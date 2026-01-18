@@ -227,6 +227,21 @@
             border-left: 3px solid #ED1C24;
         }
 
+        #mute-btn {
+            background: rgba(0, 0, 0, 0.6);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 30px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        #mute-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
         .button-container {
             display: flex;
             flex-direction: column;
@@ -279,6 +294,7 @@
         <div id="header">
             <div id="score-board">Točke: <span id="score-val">0</span></div>
             <div id="timer-board">Čas: <span id="time-val">60</span>s</div>
+            <button id="mute-btn">🔊</button>
         </div>
         <div id="combo-display">COMBO x<span id="combo-val">3</span>!</div>
         <div id="hit-feedback">+100</div>
@@ -369,6 +385,26 @@
                     "Nova stranka, ista faca!",
                     "Koalicija z udarcem!"
                 ]
+            },
+            {
+                name: 'logar',
+                normal: null,
+                hit: null,
+                messages: [
+                    "Diplomacija prekinjena!",
+                    "Predsedniške sanje razpočene!",
+                    "Logar izgubil kompas!"
+                ]
+            },
+            {
+                name: 'stevanovic',
+                normal: null,
+                hit: null,
+                messages: [
+                    "Protestnik utišan!",
+                    "Resnica za zapahi!",
+                    "Stevanović v nokavtu!"
+                ]
             }
         ];
 
@@ -376,6 +412,39 @@
         politicians.forEach(p => {
             p.normal = loader.load(`assets/politicians/${p.name}.png`);
             p.hit = loader.load(`assets/politicians/${p.name}-hit.png`);
+        });
+
+        // Audio setup
+        let audioEnabled = true;
+        const sounds = {
+            punch1: new Audio('assets/audio/punch1.wav'),
+            punch2: new Audio('assets/audio/punch2.wav'),
+            popup: new Audio('assets/audio/popup.wav')
+        };
+
+        // Preload all sounds
+        Object.values(sounds).forEach(sound => {
+            sound.load();
+            sound.volume = 0.5;
+        });
+
+        function playSound(name) {
+            if (!audioEnabled || !sounds[name]) return;
+            sounds[name].currentTime = 0;
+            sounds[name].play().catch(() => {}); // Ignore autoplay errors
+        }
+
+        function playHitSound() {
+            const punchSounds = ['punch1', 'punch2'];
+            const randomPunch = punchSounds[Math.floor(Math.random() * punchSounds.length)];
+            playSound(randomPunch);
+        }
+
+        // Mute toggle
+        const muteBtn = document.getElementById('mute-btn');
+        muteBtn.addEventListener('click', () => {
+            audioEnabled = !audioEnabled;
+            muteBtn.textContent = audioEnabled ? '🔊' : '🔇';
         });
 
         let currentPoliticianIndex = 0; // Track which politician is currently active
@@ -693,6 +762,7 @@
             popUpTime = performance.now(); // Track when figure appeared
 
             moveFigure(activeFigure, activeFigure.userData.targetY);
+            playSound('popup');
 
             const currentActive = activeFigure;
 
@@ -757,6 +827,7 @@
                     hitFigure.material[4].needsUpdate = true;
 
                     // FX
+                    playHitSound();
                     spawnParticles(hitFigure.position);
 
                     // Logic - brief delay to show hit texture before going down
@@ -819,6 +890,7 @@
                     hitFigure.material[4].needsUpdate = true;
 
                     // FX
+                    playHitSound();
                     spawnParticles(hitFigure.position);
 
                     // Logic - brief delay to show hit texture before going down
