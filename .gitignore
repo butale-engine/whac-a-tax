@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node (if added later)
+node_modules/
+
+# Development files (not for public repo)
+.claude/
+docs/
+CLAUDE.md

@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="sl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Udari politika! - Volilna igra 2026</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        #header {
+            padding: 20px;
+            padding-top: max(20px, env(safe-area-inset-top));
+            padding-left: max(20px, env(safe-area-inset-left));
+            padding-right: max(20px, env(safe-area-inset-right));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #score-board,
+        #timer-board {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px 20px;
+            border-radius: 30px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+            backdrop-filter: blur(8px);
+            z-index: 10;
+        }
+
+        #modal {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            animation: popIn 0.3s ease-out;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        h1 {
+            color: #005DA4;
+            margin: 0 0 20px 0;
+            font-size: 32px;
+        }
+
+        p {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #005DA4 0%, #004080 100%);
+            color: white;
+            border: none;
+            padding: 15px 32px;
+            font-size: 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+            box-shadow: 0 4px 15px rgba(0, 93, 164, 0.4);
+            min-width: 200px;
+            min-height: 54px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 93, 164, 0.5);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            background: linear-gradient(135deg, #004080 0%, #003366 100%);
+        }
+
+        #combo-display {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            padding: 8px 20px;
+            border-radius: 20px;
+            color: #333;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        #combo-display.visible {
+            opacity: 1;
+        }
+
+        #hit-feedback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: bold;
+            color: #4CAF50;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            opacity: 0;
+            pointer-events: none;
+            transition: none;
+        }
+
+        #hit-feedback.quick {
+            color: #FFD700;
+        }
+
+        @keyframes hitPop {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -80%) scale(1); opacity: 0; }
+        }
+
+        #hit-feedback.show {
+            animation: hitPop 0.6s ease-out forwards;
+        }
+
+        #hit-message {
+            position: absolute;
+            bottom: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            max-width: 80%;
+            opacity: 0;
+            pointer-events: none;
+            border: 2px solid #FFD700;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        @keyframes messageSlide {
+            0% { transform: translateX(-50%) translateY(20px); opacity: 0; }
+            15% { transform: translateX(-50%) translateY(0); opacity: 1; }
+            85% { transform: translateX(-50%) translateY(0); opacity: 1; }
+            100% { transform: translateX(-50%) translateY(-10px); opacity: 0; }
+        }
+
+        #hit-message.show {
+            animation: messageSlide 1.5s ease-out forwards;
+        }
+
+        #disclaimer {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding-bottom: max(10px, env(safe-area-inset-bottom));
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        #score-board {
+            border-left: 3px solid #005DA4;
+        }
+
+        #timer-board {
+            border-left: 3px solid #ED1C24;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+
+        #share-btn {
+            background: linear-gradient(135deg, #ED1C24 0%, #C41E24 100%);
+            box-shadow: 0 4px 15px rgba(237, 28, 36, 0.4);
+            display: none;
+        }
+
+        #share-btn:hover {
+            box-shadow: 0 6px 20px rgba(237, 28, 36, 0.5);
+        }
+
+        #share-btn:active {
+            background: linear-gradient(135deg, #C41E24 0%, #A01820 100%);
+        }
+
+        #share-btn.visible {
+            display: block;
+        }
+
+        #share-toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        #share-toast.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ui-layer">
+        <div id="header">
+            <div id="score-board">Točke: <span id="score-val">0</span></div>
+            <div id="timer-board">Čas: <span id="time-val">60</span>s</div>
+        </div>
+        <div id="combo-display">COMBO x<span id="combo-val">3</span>!</div>
+        <div id="hit-feedback">+100</div>
+        <div id="hit-message"></div>
+        <div id="disclaimer">Satirična igra za politični komentar</div>
+    </div>
+
+    <div id="overlay">
+        <div id="modal">
+            <h1 id="title-text">Volitve 2026:<br>Udari politika!</h1>
+            <p id="desc-text">Klikni politike in naberi točke!</p>
+            <div class="button-container">
+                <button id="share-btn">Deli rezultat</button>
+                <button id="start-btn">Začni igro</button>
+            </div>
+        </div>
+    </div>
+    <div id="share-toast">Rezultat kopiran!</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Setup scene
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1A1A2E); // Dark gray from style guide
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+
+        // Lights
+        const ambientLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(10, 20, 10);
+        dirLight.castShadow = true;
+        dirLight.shadow.camera.top = 10;
+        dirLight.shadow.camera.bottom = -10;
+        dirLight.shadow.camera.left = -10;
+        dirLight.shadow.camera.right = 10;
+        dirLight.shadow.mapSize.width = 2048;
+        dirLight.shadow.mapSize.height = 2048;
+        scene.add(dirLight);
+
+        // Board Group
+        const boardGroup = new THREE.Group();
+        scene.add(boardGroup);
+
+        // Main Green Platform
+        const platformGeometry = new THREE.BoxGeometry(11, 1, 11);
+        const platformMaterial = new THREE.MeshStandardMaterial({ color: 0x4C9A2A, roughness: 0.8 });
+        const platform = new THREE.Mesh(platformGeometry, platformMaterial);
+        platform.position.y = -0.5;
+        platform.receiveShadow = true;
+        boardGroup.add(platform);
+
+        // Politician images - normal and hit versions with funny messages
+        const loader = new THREE.TextureLoader();
+        const politicians = [
+            {
+                name: 'golob',
+                normal: null,
+                hit: null,
+                messages: [
+                    "Še en davek manj v žepu!",
+                    "Svoboda od tvojih davkov!",
+                    "Letalo je že naročeno!"
+                ]
+            },
+            {
+                name: 'mesec',
+                normal: null,
+                hit: null,
+                messages: [
+                    "Redistribucija udarcev!",
+                    "Levi kljuk za levico!",
+                    "Solidarnost z udarcem!"
+                ]
+            },
+            {
+                name: 'han',
+                normal: null,
+                hit: null,
+                messages: [
+                    "Prevrtljiv kot vreme!",
+                    "Nova stranka, ista faca!",
+                    "Koalicija z udarcem!"
+                ]
+            }
+        ];
+
+        // Load both normal and hit textures for each politician
+        politicians.forEach(p => {
+            p.normal = loader.load(`assets/politicians/${p.name}.png`);
+            p.hit = loader.load(`assets/politicians/${p.name}-hit.png`);
+        });
+
+        let currentPoliticianIndex = 0; // Track which politician is currently active
+
+        // Holes and figures
+        const figures = [];
+
+        for (let i = -1; i <= 1; i++) {
+            for (let j = -1; j <= 1; j++) {
+                const x = i * 3.5;
+                const z = j * 3.5;
+                const holePos = new THREE.Vector3(x, 0.01, z);
+
+                // Hole Visual
+                const holeGeo = new THREE.CircleGeometry(1.2, 32);
+                const holeMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 1 });
+                const hole = new THREE.Mesh(holeGeo, holeMat);
+                hole.rotation.x = -Math.PI / 2;
+                hole.position.copy(holePos);
+                hole.receiveShadow = true;
+                boardGroup.add(hole);
+
+                // Figure
+                const figGeo = new THREE.BoxGeometry(2, 2, 0.2);
+                const sideMat = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+                const figMat = new THREE.MeshStandardMaterial({
+                    map: null,
+                    transparent: true,
+                    alphaTest: 0.5
+                });
+                const materials = [sideMat, sideMat, sideMat, sideMat, figMat, sideMat];
+
+                const figure = new THREE.Mesh(figGeo, materials);
+                figure.position.set(x, -2, z);
+                figure.castShadow = true;
+                figure.receiveShadow = true;
+
+                figure.userData = { isUp: false, initialY: -2, targetY: 1, politicianIndex: 0 };
+                scene.add(figure);
+                figures.push(figure);
+            }
+        }
+
+        camera.position.set(0, 8, 12);
+        camera.lookAt(0, 0, 0);
+
+        // --- Particle System ---
+        const particleCount = 50;
+        const particleGeometry = new THREE.BufferGeometry();
+        const particlePositions = new Float32Array(particleCount * 3);
+        particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+        const particleMaterial = new THREE.PointsMaterial({
+            color: 0xFFFF00,
+            size: 0.5,
+            transparent: true,
+            opacity: 0.8
+        });
+        const particles = new THREE.Points(particleGeometry, particleMaterial);
+        scene.add(particles);
+
+        // Hide initial particles
+        for (let i = 0; i < particleCount * 3; i++) particlePositions[i] = 1000;
+
+        let activeParticles = [];
+
+        function spawnParticles(pos) {
+            for (let i = 0; i < 20; i++) {
+                activeParticles.push({
+                    x: pos.x, y: pos.y + 1, z: pos.z,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: Math.random() * 0.5,
+                    vz: (Math.random() - 0.5) * 0.5,
+                    life: 1.0
+                });
+            }
+        }
+
+        function updateParticles() {
+            const positions = particles.geometry.attributes.position.array;
+            let pIndex = 0;
+
+            // Clean dead particles first
+            for (let i = activeParticles.length - 1; i >= 0; i--) {
+                let p = activeParticles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.z += p.vz;
+                p.vy -= 0.02; // Gravity
+                p.life -= 0.02;
+
+                if (p.life <= 0 || p.y < 0) {
+                    activeParticles.splice(i, 1);
+                } else {
+                    if (pIndex < particleCount) {
+                        positions[pIndex * 3] = p.x;
+                        positions[pIndex * 3 + 1] = p.y;
+                        positions[pIndex * 3 + 2] = p.z;
+                        pIndex++;
+                    }
+                }
+            }
+
+            // Clear remaining buffer slots
+            for (let j = pIndex; j < particleCount; j++) {
+                positions[j * 3] = 1000;
+                positions[j * 3 + 1] = 1000;
+                positions[j * 3 + 2] = 1000;
+            }
+
+            particles.geometry.attributes.position.needsUpdate = true;
+        }
+
+
+        // --- Game Logic ---
+        let score = 0;
+        let timeLeft = 60;
+        let activeFigure = null;
+        let popUpTime = 0;      // Track when figure popped up for quick-hit bonus
+        let comboCount = 0;     // Track consecutive hits for combo multiplier
+        let gameTimerInterval;
+        let isGameRunning = false;
+        let popUpTimer;
+
+        const scoreElement = document.getElementById('score-val');
+        const timeElement = document.getElementById('time-val');
+        const overlay = document.getElementById('overlay');
+        const startBtn = document.getElementById('start-btn');
+        const shareBtn = document.getElementById('share-btn');
+        const shareToast = document.getElementById('share-toast');
+        const titleText = document.getElementById('title-text');
+        const descText = document.getElementById('desc-text');
+        const comboDisplay = document.getElementById('combo-display');
+        const comboVal = document.getElementById('combo-val');
+        const hitFeedback = document.getElementById('hit-feedback');
+        const hitMessage = document.getElementById('hit-message');
+
+        // Show hit feedback animation
+        function showHitFeedback(points, isQuickHit) {
+            hitFeedback.textContent = '+' + points;
+            hitFeedback.className = isQuickHit ? 'quick show' : 'show';
+            // Reset animation
+            setTimeout(() => {
+                hitFeedback.className = '';
+            }, 600);
+        }
+
+        // Update combo display
+        function updateComboDisplay() {
+            if (comboCount >= 3) {
+                comboVal.textContent = comboCount;
+                comboDisplay.classList.add('visible');
+            } else {
+                comboDisplay.classList.remove('visible');
+            }
+        }
+
+        // Show funny hit message
+        function showHitMessage(politicianIndex) {
+            const politician = politicians[politicianIndex];
+            const messages = politician.messages;
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            hitMessage.textContent = randomMessage;
+            hitMessage.className = 'show';
+            setTimeout(() => {
+                hitMessage.className = '';
+            }, 1500);
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            shareToast.textContent = message;
+            shareToast.classList.add('show');
+            setTimeout(() => {
+                shareToast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Share result using Web Share API or clipboard fallback
+        async function shareResult() {
+            const shareText = `Dosegel/a sem ${score} točk v igri "Udari politika!"! Me lahko premagaš?`;
+            const shareUrl = window.location.href;
+
+            // Try Web Share API first (works on mobile)
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Udari politika! - Volilna igra 2026',
+                        text: shareText,
+                        url: shareUrl
+                    });
+                    return;
+                } catch (err) {
+                    // User cancelled or error - fall through to clipboard
+                    if (err.name === 'AbortError') return;
+                }
+            }
+
+            // Fallback: copy to clipboard
+            const fullText = `${shareText}\n${shareUrl}`;
+            try {
+                await navigator.clipboard.writeText(fullText);
+                showToast('Rezultat kopiran!');
+            } catch (err) {
+                // Final fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = fullText;
+                textArea.style.position = 'fixed';
+                textArea.style.opacity = '0';
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast('Rezultat kopiran!');
+            }
+        }
+
+        function startGame() {
+            score = 0;
+            timeLeft = 60;
+            comboCount = 0;
+            scoreElement.innerText = score;
+            timeElement.innerText = timeLeft;
+            isGameRunning = true;
+            comboDisplay.classList.remove('visible');
+            shareBtn.classList.remove('visible');
+
+            overlay.style.display = 'none';
+
+            // Start Loop
+            // Cancel any pending popups
+            if (popUpTimer) clearTimeout(popUpTimer);
+            if (activeFigure) {
+                moveFigure(activeFigure, activeFigure.userData.initialY);
+                activeFigure = null;
+            }
+
+            scheduleNextPop();
+
+            if (gameTimerInterval) clearInterval(gameTimerInterval);
+            gameTimerInterval = setInterval(() => {
+                timeLeft--;
+                timeElement.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            isGameRunning = false;
+            clearInterval(gameTimerInterval);
+            if (popUpTimer) clearTimeout(popUpTimer);
+            if (activeFigure) {
+                moveFigure(activeFigure, activeFigure.userData.initialY);
+                activeFigure = null;
+            }
+
+            titleText.innerText = "Konec igre!";
+            descText.innerText = `Končni rezultat: ${score} točk`;
+            startBtn.innerText = "Igraj znova";
+            shareBtn.classList.add('visible');
+            overlay.style.display = 'flex';
+        }
+
+
+
+        function scheduleNextPop() {
+            if (!isGameRunning) return;
+
+            // Difficulty scaling: faster as score increases
+            let delay = 1500 - (score * 30);
+            if (delay < 600) delay = 600;
+
+            popUpTimer = setTimeout(() => {
+                popUp();
+                scheduleNextPop();
+            }, delay);
+        }
+
+        // Animation / Tweening helper
+        function moveFigure(figure, targetY, duration = 300) {
+            const startY = figure.position.y;
+            const startTime = performance.now();
+
+            function animateMove(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const ease = 1 - Math.pow(1 - progress, 3);
+                figure.position.y = startY + (targetY - startY) * ease;
+                if (progress < 1) requestAnimationFrame(animateMove);
+            }
+            requestAnimationFrame(animateMove);
+        }
+
+        function popUp() {
+            if (!isGameRunning) return;
+
+            if (activeFigure) {
+                activeFigure.userData.isUp = false;
+                moveFigure(activeFigure, activeFigure.userData.initialY);
+                activeFigure = null;
+            }
+
+            const index = Math.floor(Math.random() * figures.length);
+            const figure = figures[index];
+
+            // Select random politician and show normal texture
+            const politicianIndex = Math.floor(Math.random() * politicians.length);
+            figure.userData.politicianIndex = politicianIndex;
+            figure.material[4].map = politicians[politicianIndex].normal;
+            figure.material[4].needsUpdate = true;
+
+            activeFigure = figure;
+            activeFigure.userData.isUp = true;
+            popUpTime = performance.now(); // Track when figure appeared
+
+            moveFigure(activeFigure, activeFigure.userData.targetY);
+
+            const currentActive = activeFigure;
+
+            // Stay up duration
+            let stayDuration = 1000 - (score * 10);
+            if (stayDuration < 500) stayDuration = 500;
+
+            setTimeout(() => {
+                if (activeFigure === currentActive && activeFigure) {
+                    activeFigure.userData.isUp = false;
+                    moveFigure(activeFigure, activeFigure.userData.initialY);
+                    activeFigure = null;
+                    // Reset combo on miss (figure went down without being hit)
+                    comboCount = 0;
+                    updateComboDisplay();
+                }
+            }, stayDuration);
+        }
+
+        // Raycaster
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        function onMouseDown(event) {
+            // Only interact if game running and not clicking overlay UI (which has higher z-index anyway, but good to check)
+            if (!isGameRunning) return;
+
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(figures);
+
+            if (intersects.length > 0) {
+                const hitFigure = intersects[0].object;
+                if (hitFigure === activeFigure && hitFigure.userData.isUp) {
+                    // Calculate reaction time for quick-hit bonus
+                    const reactionTime = performance.now() - popUpTime;
+                    const isQuickHit = reactionTime < 500;
+
+                    // Base points: 100 normal, 150 for quick hit
+                    let points = isQuickHit ? 150 : 100;
+
+                    // Increment combo counter
+                    comboCount++;
+
+                    // Apply 1.5x multiplier for 3+ consecutive hits
+                    if (comboCount >= 3) {
+                        points = Math.floor(points * 1.5);
+                    }
+
+                    score += points;
+                    scoreElement.innerText = score;
+
+                    // Visual feedback
+                    const pIndex = hitFigure.userData.politicianIndex;
+                    showHitFeedback(points, isQuickHit);
+                    showHitMessage(pIndex);
+                    updateComboDisplay();
+
+                    // Swap to hit texture
+                    hitFigure.material[4].map = politicians[pIndex].hit;
+                    hitFigure.material[4].needsUpdate = true;
+
+                    // FX
+                    spawnParticles(hitFigure.position);
+
+                    // Logic - brief delay to show hit texture before going down
+                    hitFigure.userData.isUp = false;
+                    setTimeout(() => {
+                        moveFigure(hitFigure, hitFigure.userData.initialY, 100);
+                    }, 150);
+                    activeFigure = null;
+
+                    // Immediate next pop? Or wait for schedule.
+                    // Let's reset schedule to keep pace fast
+                    if (popUpTimer) clearTimeout(popUpTimer);
+                    scheduleNextPop();
+                }
+            }
+        }
+
+        startBtn.addEventListener('click', startGame);
+        shareBtn.addEventListener('click', shareResult);
+
+        // Handle both mouse and touch events
+        function onTouchStart(event) {
+            if (!isGameRunning) return;
+            event.preventDefault();
+            const touch = event.touches[0];
+            mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(figures);
+
+            if (intersects.length > 0) {
+                const hitFigure = intersects[0].object;
+                if (hitFigure === activeFigure && hitFigure.userData.isUp) {
+                    // Calculate reaction time for quick-hit bonus
+                    const reactionTime = performance.now() - popUpTime;
+                    const isQuickHit = reactionTime < 500;
+
+                    // Base points: 100 normal, 150 for quick hit
+                    let points = isQuickHit ? 150 : 100;
+
+                    // Increment combo counter
+                    comboCount++;
+
+                    // Apply 1.5x multiplier for 3+ consecutive hits
+                    if (comboCount >= 3) {
+                        points = Math.floor(points * 1.5);
+                    }
+
+                    score += points;
+                    scoreElement.innerText = score;
+
+                    // Visual feedback
+                    const pIndex = hitFigure.userData.politicianIndex;
+                    showHitFeedback(points, isQuickHit);
+                    showHitMessage(pIndex);
+                    updateComboDisplay();
+
+                    // Swap to hit texture
+                    hitFigure.material[4].map = politicians[pIndex].hit;
+                    hitFigure.material[4].needsUpdate = true;
+
+                    // FX
+                    spawnParticles(hitFigure.position);
+
+                    // Logic - brief delay to show hit texture before going down
+                    hitFigure.userData.isUp = false;
+                    setTimeout(() => {
+                        moveFigure(hitFigure, hitFigure.userData.initialY, 100);
+                    }, 150);
+                    activeFigure = null;
+
+                    // Reset schedule to keep pace fast
+                    if (popUpTimer) clearTimeout(popUpTimer);
+                    scheduleNextPop();
+                }
+            }
+        }
+
+        window.addEventListener('mousedown', onMouseDown);
+        window.addEventListener('touchstart', onTouchStart, { passive: false });
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            updateParticles();
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+
+</html>
