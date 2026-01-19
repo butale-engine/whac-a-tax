@@ -8,28 +8,28 @@
     <meta name="mobile-web-app-capable" content="yes">
 
     <!-- Primary Meta Tags -->
-    <title>Udari politika! - Volitve 2026</title>
-    <meta name="title" content="Udari politika! - Volitve 2026">
-    <meta name="description" content="Satirična igra za slovenske volitve 2026. Udari politike in zberi točke! Brezplačna igra brez registracije.">
-    <meta name="keywords" content="volitve 2026, slovenija, igra, satirična igra, politika, whac-a-mole">
+    <title>Kladivo ljudstva - Volitve 2026</title>
+    <meta name="title" content="Kladivo ljudstva - Volitve 2026">
+    <meta name="description" content="Zgrabi kladivo in pokaži politikom, kdo je šef! Satirična volilna igra 2026. Brezplačno, brez registracije, 100% frustracije!">
+    <meta name="keywords" content="volitve 2026, slovenija, igra, satirična igra, politika, kladivo, whac-a-mole">
     <meta name="author" content="Butale Engine">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://igraj.app/">
-    <meta property="og:title" content="Udari politika! - Volitve 2026">
-    <meta property="og:description" content="Satirična igra za slovenske volitve 2026. Udari politike in zberi točke!">
+    <meta property="og:title" content="Kladivo ljudstva - Volitve 2026">
+    <meta property="og:description" content="Zgrabi kladivo in pokaži politikom, kdo je šef! 100% frustracije, 0% davkov.">
     <meta property="og:image" content="https://igraj.app/assets/og-image.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:locale" content="sl_SI">
-    <meta property="og:site_name" content="Udari politika!">
+    <meta property="og:site_name" content="Kladivo ljudstva">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://igraj.app/">
-    <meta name="twitter:title" content="Udari politika! - Volitve 2026">
-    <meta name="twitter:description" content="Satirična igra za slovenske volitve 2026. Udari politike in zberi točke!">
+    <meta name="twitter:title" content="Kladivo ljudstva - Volitve 2026">
+    <meta name="twitter:description" content="Zgrabi kladivo in pokaži politikom, kdo je šef! 100% frustracije, 0% davkov.">
     <meta name="twitter:image" content="https://igraj.app/assets/og-image.png">
 
     <!-- Favicon -->
@@ -349,21 +349,21 @@
         <div id="combo-display">COMBO x<span id="combo-val">3</span>!</div>
         <div id="hit-feedback">+100</div>
         <div id="hit-message"></div>
-        <div id="disclaimer">Satirična igra za politični komentar</div>
+        <div id="disclaimer">Nobena kladiva ni bila poškodovana. Politiki pa...</div>
     </div>
 
     <div id="overlay">
         <div id="modal">
-            <h1 id="title-text">Volitve 2026:<br>Udari politika!</h1>
-            <p id="desc-text">Klikni politike in naberi točke!</p>
+            <h1 id="title-text">Kladivo ljudstva</h1>
+            <p id="desc-text">Zgrabi kladivo in razbij politične obljube!</p>
             <div class="button-container">
                 <button id="download-btn">📸 Shrani sliko</button>
                 <button id="share-btn">Deli rezultat</button>
-                <button id="start-btn">Začni igro</button>
+                <button id="start-btn">Zgrabi kladivo!</button>
             </div>
         </div>
     </div>
-    <div id="share-toast">Rezultat kopiran!</div>
+    <div id="share-toast">Kladivo kopirano v odložišče!</div>
     <canvas id="score-card" style="display:none;"></canvas>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -413,9 +413,10 @@
                 normal: null,
                 hit: null,
                 messages: [
-                    "Še en davek manj v žepu!",
-                    "Svoboda od tvojih davkov!",
-                    "Letalo je že naročeno!"
+                    "Kladivo je našlo zeleno energijo!",
+                    "Svoboda? Evo ti svoboda! *BONK*",
+                    "Letalo zamuja, kladivo ne!",
+                    "Davki padajo... skupaj s tabo!"
                 ]
             },
             {
@@ -423,9 +424,10 @@
                 normal: null,
                 hit: null,
                 messages: [
-                    "Redistribucija udarcev!",
-                    "Levi kljuk za levico!",
-                    "Solidarnost z udarcem!"
+                    "Redistribucija kladiva!",
+                    "Komunizem 0, Kladivo 1!",
+                    "Rdeča zvezda vidi zvezdice!",
+                    "Solidarnost? Evo solidaren udarec!"
                 ]
             },
             {
@@ -433,9 +435,10 @@
                 normal: null,
                 hit: null,
                 messages: [
-                    "Prevrtljiv kot vreme!",
-                    "Nova stranka, ista faca!",
-                    "Koalicija z udarcem!"
+                    "Zamenjal stranko, dobil kladivo!",
+                    "Vremenska napoved: Kladivo!",
+                    "Han Solo? Han BOLO!",
+                    "Koalicija s kladivom!"
                 ]
             },
             {
@@ -443,9 +446,10 @@
                 normal: null,
                 hit: null,
                 messages: [
-                    "Diplomacija prekinjena!",
-                    "Predsedniške sanje razpočene!",
-                    "Logar izgubil kompas!"
+                    "Diplomacija kladiva!",
+                    "Predsednik kladiva 2026!",
+                    "Logar logal, kladivo trkalo!",
+                    "NATO kliče? Kladivo odgovarja!"
                 ]
             },
             {
@@ -453,9 +457,10 @@
                 normal: null,
                 hit: null,
                 messages: [
-                    "Protestnik utišan!",
-                    "Resnica za zapahi!",
-                    "Stevanović v nokavtu!"
+                    "Resnica boli, kladivo tudi!",
+                    "Protest? Kladivo protestira nazaj!",
+                    "Preiskava zaključena: KLADIVO!",
+                    "Stevanovič ušel, kladivo ga našlo!"
                 ]
             }
         ];
@@ -669,11 +674,11 @@
 
         // Score card generation
         function getScoreMessage(finalScore) {
-            if (finalScore >= 3000) return "Pravi politični čistilec!";
-            if (finalScore >= 2000) return "Ministrski material!";
-            if (finalScore >= 1000) return "Dober začetek, volivec!";
-            if (finalScore >= 500) return "Še malo vaje, državljan!";
-            return "Politiki so te premagali!";
+            if (finalScore >= 3000) return "Thor ti zavidá! Mojster kladiva!";
+            if (finalScore >= 2000) return "Kladivo ljudstva te imenuje za ministra!";
+            if (finalScore >= 1000) return "Solidno kladivo! Politiki te že sovražijo!";
+            if (finalScore >= 500) return "Kladivo je še hladno, gremo dalje!";
+            return "Politiki so zmagali... TO JE NESPREJEMLJIVO!";
         }
 
         function generateScoreCard(finalScore) {
@@ -706,7 +711,7 @@
             ctx.textAlign = 'center';
             ctx.fillText('Volitve 2026:', canvas.width / 2, 250);
             ctx.font = 'bold 72px system-ui, -apple-system, sans-serif';
-            ctx.fillText('Udari politika!', canvas.width / 2, 340);
+            ctx.fillText('Kladivo ljudstva', canvas.width / 2, 340);
 
             // Score circle background
             ctx.beginPath();
@@ -736,7 +741,7 @@
             // Call to action
             ctx.font = 'bold 36px system-ui, -apple-system, sans-serif';
             ctx.fillStyle = '#FFFFFF';
-            ctx.fillText('Lahko me premagate?', canvas.width / 2, 1200);
+            ctx.fillText('Imaš dovolj močno kladivo?', canvas.width / 2, 1200);
 
             // URL box
             ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
@@ -750,7 +755,7 @@
             // Disclaimer
             ctx.font = '24px system-ui, -apple-system, sans-serif';
             ctx.fillStyle = '#666666';
-            ctx.fillText('Satirična igra za politični komentar', canvas.width / 2, 1800);
+            ctx.fillText('Nobena kladiva ni bila poškodovana. Politiki pa...', canvas.width / 2, 1800);
 
             return canvas.toDataURL('image/png');
         }
@@ -773,12 +778,12 @@
         function downloadScoreCard() {
             const dataUrl = generateScoreCard(score);
             const link = document.createElement('a');
-            link.download = `udari-politika-${score}-tock.png`;
+            link.download = `kladivo-ljudstva-${score}-tock.png`;
             link.href = dataUrl;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            showToast('Slika shranjena!');
+            showToast('Kladivo fotografirano!');
         }
 
         // Show toast notification
@@ -792,14 +797,14 @@
 
         // Share result using Web Share API or clipboard fallback
         async function shareResult() {
-            const shareText = `Dosegel/a sem ${score} točk v igri "Udari politika!"! Me lahko premagaš?`;
+            const shareText = `Moje kladivo je razbilo ${score} točk! Tvoje kladivo je verjetno iz kartona. Dokaži nasprotno!`;
             const shareUrl = window.location.href;
 
             // Try Web Share API first (works on mobile)
             if (navigator.share) {
                 try {
                     await navigator.share({
-                        title: 'Udari politika! - Volilna igra 2026',
+                        title: 'Kladivo ljudstva - Volitve 2026',
                         text: shareText,
                         url: shareUrl
                     });
@@ -871,9 +876,9 @@
                 activeFigure = null;
             }
 
-            titleText.innerText = "Konec igre!";
-            descText.innerText = `Končni rezultat: ${score} točk`;
-            startBtn.innerText = "Igraj znova";
+            titleText.innerText = "Kladivo počiva!";
+            descText.innerText = `Razbil/a si ${score} političnih obljub!`;
+            startBtn.innerText = "Še enkrat razbijaj!";
             shareBtn.classList.add('visible');
             downloadBtn.classList.add('visible');
             overlay.style.display = 'flex';
