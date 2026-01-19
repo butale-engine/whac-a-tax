@@ -6,7 +6,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>Udari politika! - Volilna igra 2026</title>
+
+    <!-- Primary Meta Tags -->
+    <title>Udari politika! - Volitve 2026</title>
+    <meta name="title" content="Udari politika! - Volitve 2026">
+    <meta name="description" content="Satirična igra za slovenske volitve 2026. Udari politike in zberi točke! Brezplačna igra brez registracije.">
+    <meta name="keywords" content="volitve 2026, slovenija, igra, satirična igra, politika, whac-a-mole">
+    <meta name="author" content="Butale Engine">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://igraj.app/">
+    <meta property="og:title" content="Udari politika! - Volitve 2026">
+    <meta property="og:description" content="Satirična igra za slovenske volitve 2026. Udari politike in zberi točke!">
+    <meta property="og:image" content="https://igraj.app/assets/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="sl_SI">
+    <meta property="og:site_name" content="Udari politika!">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://igraj.app/">
+    <meta name="twitter:title" content="Udari politika! - Volitve 2026">
+    <meta name="twitter:description" content="Satirična igra za slovenske volitve 2026. Udari politike in zberi točke!">
+    <meta name="twitter:image" content="https://igraj.app/assets/og-image.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+    <meta name="theme-color" content="#005DA4">
+
     <style>
         body {
             margin: 0;
@@ -267,6 +298,25 @@
             display: block;
         }
 
+        #download-btn {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+            color: #1A1A2E;
+            display: none;
+        }
+
+        #download-btn:hover {
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
+        }
+
+        #download-btn:active {
+            background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
+        }
+
+        #download-btn.visible {
+            display: block;
+        }
+
         #share-toast {
             position: fixed;
             bottom: 100px;
@@ -307,12 +357,14 @@
             <h1 id="title-text">Volitve 2026:<br>Udari politika!</h1>
             <p id="desc-text">Klikni politike in naberi točke!</p>
             <div class="button-container">
+                <button id="download-btn">📸 Shrani sliko</button>
                 <button id="share-btn">Deli rezultat</button>
                 <button id="start-btn">Začni igro</button>
             </div>
         </div>
     </div>
     <div id="share-toast">Rezultat kopiran!</div>
+    <canvas id="score-card" style="display:none;"></canvas>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
@@ -573,6 +625,8 @@
         const overlay = document.getElementById('overlay');
         const startBtn = document.getElementById('start-btn');
         const shareBtn = document.getElementById('share-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const scoreCardCanvas = document.getElementById('score-card');
         const shareToast = document.getElementById('share-toast');
         const titleText = document.getElementById('title-text');
         const descText = document.getElementById('desc-text');
@@ -611,6 +665,120 @@
             setTimeout(() => {
                 hitMessage.className = '';
             }, 1500);
+        }
+
+        // Score card generation
+        function getScoreMessage(finalScore) {
+            if (finalScore >= 3000) return "Pravi politični čistilec!";
+            if (finalScore >= 2000) return "Ministrski material!";
+            if (finalScore >= 1000) return "Dober začetek, volivec!";
+            if (finalScore >= 500) return "Še malo vaje, državljan!";
+            return "Politiki so te premagali!";
+        }
+
+        function generateScoreCard(finalScore) {
+            const canvas = scoreCardCanvas;
+            const ctx = canvas.getContext('2d');
+
+            // Instagram Stories format (9:16)
+            canvas.width = 1080;
+            canvas.height = 1920;
+
+            // Background gradient (Slovenian colors)
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#005DA4');
+            gradient.addColorStop(0.5, '#1A1A2E');
+            gradient.addColorStop(1, '#1A1A2E');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Decorative elements - Slovenian flag colors accent
+            ctx.fillStyle = '#ED1C24';
+            ctx.fillRect(0, 0, canvas.width, 20);
+            ctx.fillStyle = '#005DA4';
+            ctx.fillRect(0, 20, canvas.width, 20);
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 40, canvas.width, 20);
+
+            // Game title
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 64px system-ui, -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Volitve 2026:', canvas.width / 2, 250);
+            ctx.font = 'bold 72px system-ui, -apple-system, sans-serif';
+            ctx.fillText('Udari politika!', canvas.width / 2, 340);
+
+            // Score circle background
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, 700, 220, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 215, 0, 0.15)';
+            ctx.fill();
+            ctx.strokeStyle = '#FFD700';
+            ctx.lineWidth = 8;
+            ctx.stroke();
+
+            // Score number
+            ctx.font = 'bold 180px system-ui, -apple-system, sans-serif';
+            ctx.fillStyle = '#FFD700';
+            ctx.fillText(finalScore.toString(), canvas.width / 2, 750);
+
+            // "točk" label
+            ctx.font = '48px system-ui, -apple-system, sans-serif';
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillText('točk', canvas.width / 2, 830);
+
+            // Satirical message based on score
+            const message = getScoreMessage(finalScore);
+            ctx.font = 'italic 42px system-ui, -apple-system, sans-serif';
+            ctx.fillStyle = '#B0B0B0';
+            ctx.fillText(message, canvas.width / 2, 1050);
+
+            // Call to action
+            ctx.font = 'bold 36px system-ui, -apple-system, sans-serif';
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillText('Lahko me premagate?', canvas.width / 2, 1200);
+
+            // URL box
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            roundRect(ctx, 140, 1350, 800, 80, 40);
+            ctx.fill();
+
+            ctx.font = '32px system-ui, -apple-system, sans-serif';
+            ctx.fillStyle = '#B0B0B0';
+            ctx.fillText('igraj.app', canvas.width / 2, 1405);
+
+            // Disclaimer
+            ctx.font = '24px system-ui, -apple-system, sans-serif';
+            ctx.fillStyle = '#666666';
+            ctx.fillText('Satirična igra za politični komentar', canvas.width / 2, 1800);
+
+            return canvas.toDataURL('image/png');
+        }
+
+        // Helper function for rounded rectangles
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+
+        function downloadScoreCard() {
+            const dataUrl = generateScoreCard(score);
+            const link = document.createElement('a');
+            link.download = `udari-politika-${score}-tock.png`;
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('Slika shranjena!');
         }
 
         // Show toast notification
@@ -670,6 +838,7 @@
             isGameRunning = true;
             comboDisplay.classList.remove('visible');
             shareBtn.classList.remove('visible');
+            downloadBtn.classList.remove('visible');
 
             overlay.style.display = 'none';
 
@@ -706,6 +875,7 @@
             descText.innerText = `Končni rezultat: ${score} točk`;
             startBtn.innerText = "Igraj znova";
             shareBtn.classList.add('visible');
+            downloadBtn.classList.add('visible');
             overlay.style.display = 'flex';
         }
 
@@ -847,6 +1017,7 @@
 
         startBtn.addEventListener('click', startGame);
         shareBtn.addEventListener('click', shareResult);
+        downloadBtn.addEventListener('click', downloadScoreCard);
 
         // Handle both mouse and touch events
         function onTouchStart(event) {
