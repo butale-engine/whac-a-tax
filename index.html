@@ -2,6 +2,15 @@
 <html lang="sl">
 
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-N03FF2ENWZ"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-N03FF2ENWZ');
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -776,6 +785,13 @@
         }
 
         function downloadScoreCard() {
+            // Track download action
+            gtag('event', 'download', {
+                'event_category': 'engagement',
+                'event_label': 'score_card',
+                'value': score
+            });
+
             const dataUrl = generateScoreCard(score);
             const link = document.createElement('a');
             link.download = `kladivo-ljudstva-${score}-tock.png`;
@@ -797,6 +813,13 @@
 
         // Share result using Web Share API or clipboard fallback
         async function shareResult() {
+            // Track share action
+            gtag('event', 'share', {
+                'event_category': 'engagement',
+                'event_label': 'score_share',
+                'value': score
+            });
+
             const shareText = `Moje kladivo je razbilo ${score} točk! Tvoje kladivo je verjetno iz kartona. Dokaži nasprotno!`;
             const shareUrl = window.location.href;
 
@@ -835,6 +858,9 @@
         }
 
         function startGame() {
+            // Track game start
+            gtag('event', 'game_start', { 'event_category': 'game' });
+
             score = 0;
             timeLeft = 60;
             comboCount = 0;
@@ -868,6 +894,12 @@
         }
 
         function endGame() {
+            // Track game completion with score
+            gtag('event', 'game_complete', {
+                'event_category': 'game',
+                'value': score
+            });
+
             isGameRunning = false;
             clearInterval(gameTimerInterval);
             if (popUpTimer) clearTimeout(popUpTimer);
